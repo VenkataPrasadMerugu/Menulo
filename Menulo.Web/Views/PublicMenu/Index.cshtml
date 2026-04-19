@@ -1,0 +1,175 @@
+@model Menulo.Web.ViewModels.Public.PublicMenuViewModel
+@using Menulo.Domain.Modules.Menu
+@using System.Linq
+@using System.Text.RegularExpressions
+@{
+    Layout = null;
+    static string Humanize(string value) => Regex.Replace(value, "(\\B[A-Z])", " $1");
+    var categories = Model.Items.Select(x => x.Category).Distinct().OrderBy(x => x.ToString()).ToList();
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@Model.RestaurantName Menu | Menulo</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        :root {
+            --menu-primary: @Model.PrimaryColor;
+            --menu-secondary: @Model.SecondaryColor;
+        }
+    </style>
+</head>
+<body class="public-menu-body">
+    <header class="public-menu-header">
+        <div class="container">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4">
+                <div class="d-flex align-items-center gap-3">
+                    @if (!string.IsNullOrWhiteSpace(Model.LogoPath))
+                    {
+                        <img class="brand-logo" src="@Url.Content(Model.LogoPath)" alt="@Model.RestaurantName logo" />
+                    }
+                    <div>
+                        <span class="eyebrow text-white-50">Digital Menu</span>
+                        <h1 class="mb-1 text-white">@Model.RestaurantName</h1>
+                        @if (!string.IsNullOrWhiteSpace(Model.BranchName) || !string.IsNullOrWhiteSpace(Model.Address))
+                        {
+                            <div class="text-white-50 small">
+                                @Model.BranchName
+                                @if (!string.IsNullOrWhiteSpace(Model.BranchName) && !string.IsNullOrWhiteSpace(Model.Address))
+                                {
+                                    <span> | </span>
+                                }
+                                @Model.Address
+                            </div>
+                        }
+                    </div>
+                </div>
+                <a class="btn btn-light" href="/">Powered by Menulo</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container py-4 py-lg-5">
+        <section class="public-filter-panel">
+            <div class="public-search-row">
+                <div class="public-search-box">
+                    <span class="public-search-icon" aria-hidden="true">&#128269;</span>
+                    <input type="search" class="form-control public-search-input js-menu-search" placeholder="Search menu items or categories" aria-label="Search menu items" />
+                </div>
+            </div>
+
+            <div class="public-filter-strip">
+                <button type="button" class="public-filter-chip active js-menu-filter" data-filter-group="foodType" data-filter-value="all">All</button>
+                <button type="button" class="public-filter-chip public-filter-chip-veg js-menu-filter" data-filter-group="foodType" data-filter-value="veg">Veg</button>
+                <button type="button" class="public-filter-chip public-filter-chip-nonveg js-menu-filter" data-filter-group="foodType" data-filter-value="non-veg">Non-Veg</button>
+                <button type="button" class="public-filter-chip js-menu-filter" data-filter-group="availability" data-filter-value="available">Available</button>
+                <button type="button" class="public-filter-chip js-menu-filter" data-filter-group="availability" data-filter-value="outofstock">Out of Stock</button>
+                @foreach (var category in categories)
+                {
+                    <button type="button" class="public-filter-chip js-menu-filter" data-filter-group="category" data-filter-value="@category">@Humanize(category.ToString())</button>
+                }
+            </div>
+        </section>
+
+        <div class="menu-grid">
+            @foreach (var item in Model.Items)
+            {
+                var isOutOfStock = item.Status == MenuItemStatus.OutOfStock;
+                var modalId = $"gallery-{item.Id}";
+                var galleryCarouselId = $"gallery-carousel-{item.Id}";
+                <article
+                    class="public-menu-card @(isOutOfStock ? "out-of-stock" : string.Empty)"
+                    data-menu-item
+                    data-food-type="@(item.FoodType == FoodType.Veg ? "veg" : "non-veg")"
+                    data-availability="@(isOutOfStock ? "outofstock" : "available")"
+                    data-category="@item.Category"
+                    data-search="@($"{item.Name} {item.Category} {item.FoodType}".ToLowerInvariant())">
+                    <div class="public-menu-card-inner">
+                        <div class="public-image-shell">
+                            @if (!string.IsNullOrWhiteSpace(item.PrimaryImagePath))
+                            {
+                                <button type="button" class="image-button" data-bs-toggle="modal" data-bs-target="#@modalId">
+                                    <img src="@Url.Content(item.PrimaryImagePath)" alt="@item.Name" class="public-item-image" />
+                                </button>
+                            }
+                            else
+                            {
+                                <div class="public-item-placeholder">No Image</div>
+                            }
+                        </div>
+                        <div class="public-menu-content">
+                            <div class="d-flex flex-wrap gap-2 mb-2">
+                                <span class="food-type-pill @(item.FoodType == FoodType.Veg ? "veg" : "non-veg")">@item.FoodType</span>
+                                <span class="menu-category-pill">@Humanize(item.Category.ToString())</span>
+                                @if (isOutOfStock)
+                                {
+                                    <span class="stock-badge-inline">Out of Stock</span>
+                                }
+                            </div>
+                            <div class="d-flex justify-content-between gap-3 align-items-start">
+                                <div class="flex-grow-1">
+                                    <h2 class="public-item-title">@item.Name</h2>
+                                    <div class="public-item-meta">
+                                        <span>Serves @item.Serves</span>
+                                    </div>
+                                </div>
+                                <span class="price-tag">@Model.CurrencySymbol @item.Price.ToString("0.00")</span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <div class="modal fade" id="@modalId" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content gallery-modal">
+                            <div class="modal-header border-0">
+                                <h2 class="h5 mb-0">@item.Name</h2>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body pt-0">
+                                @if (item.ImagePaths.Count > 1)
+                                {
+                                    <div id="@galleryCarouselId" class="carousel slide" data-bs-ride="false">
+                                        <div class="carousel-indicators gallery-indicators position-static mb-3">
+                                            @for (var index = 0; index < item.ImagePaths.Count; index++)
+                                            {
+                                                <button type="button" data-bs-target="#@galleryCarouselId" data-bs-slide-to="@index" class="@(index == 0 ? "active" : string.Empty)" aria-current="@(index == 0 ? "true" : "false")" aria-label="Slide @(index + 1)"></button>
+                                            }
+                                        </div>
+                                        <div class="carousel-inner">
+                                            @for (var index = 0; index < item.ImagePaths.Count; index++)
+                                            {
+                                                <div class="carousel-item @(index == 0 ? "active" : string.Empty)">
+                                                    <img src="@Url.Content(item.ImagePaths[index])" alt="@item.Name" class="gallery-image" />
+                                                </div>
+                                            }
+                                        </div>
+                                        <button class="carousel-control-prev gallery-control" type="button" data-bs-target="#@galleryCarouselId" data-bs-slide="prev">
+                                            <span class="carousel-control-prev-icon"></span>
+                                            <span class="visually-hidden">Previous</span>
+                                        </button>
+                                        <button class="carousel-control-next gallery-control" type="button" data-bs-target="#@galleryCarouselId" data-bs-slide="next">
+                                            <span class="carousel-control-next-icon"></span>
+                                            <span class="visually-hidden">Next</span>
+                                        </button>
+                                    </div>
+                                }
+                                else if (!string.IsNullOrWhiteSpace(item.PrimaryImagePath))
+                                {
+                                    <img src="@Url.Content(item.PrimaryImagePath)" alt="@item.Name" class="gallery-image" />
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </main>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+</body>
+</html>

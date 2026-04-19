@@ -1,0 +1,90 @@
+@model Menulo.Web.ViewModels.Account.RegisterViewModel
+@{
+    ViewData["Title"] = "Register";
+    ViewData["BodyClass"] = "auth-body";
+}
+
+<section class="auth-shell">
+    <div class="auth-layout">
+        <aside class="auth-showcase auth-showcase-register">
+            <div class="auth-showcase-inner">
+                <a class="auth-brandmark" asp-controller="Home" asp-action="Index">
+                    <span class="auth-brandmark-icon">M</span>
+                    <span>Menulo</span>
+                </a>
+
+                <div class="auth-showcase-copy">
+                    <span class="auth-kicker">Launch faster</span>
+                    <h1>Set up your digital restaurant presence with a sharper owner experience.</h1>
+                    <p>
+                        Create your owner account, add one or more restaurants, apply branding, upload menu items, and publish a mobile-ready menu page with zero clutter.
+                    </p>
+                </div>
+
+                <div class="auth-stat-grid">
+                    <article class="auth-stat-card">
+                        <strong>Multi-branch</strong>
+                        <span>Manage separate restaurant profiles under one owner login.</span>
+                    </article>
+                    <article class="auth-stat-card">
+                        <strong>Branded menus</strong>
+                        <span>Apply logo, color palette, and restaurant identity to public pages.</span>
+                    </article>
+                    <article class="auth-stat-card">
+                        <strong>Fast publishing</strong>
+                        <span>Update menu items and customer-facing output without rebuilding anything.</span>
+                    </article>
+                </div>
+            </div>
+        </aside>
+
+        <div class="auth-panel-wrap">
+            <div class="auth-panel">
+                <div class="auth-panel-header">
+                    <span class="auth-panel-badge">Create account</span>
+                    <h2>Start with your owner account</h2>
+                    <p>Once registered, you can add restaurants, branding, and menu items immediately.</p>
+                </div>
+
+                <form method="post" novalidate class="auth-form-grid">
+                    <div asp-validation-summary="ModelOnly" class="text-danger small auth-validation-summary"></div>
+
+                    <div class="auth-field auth-field-full">
+                        <label asp-for="FullName" class="form-label"></label>
+                        <input asp-for="FullName" class="form-control auth-input" placeholder="Chef owner name" />
+                        <span asp-validation-for="FullName" class="text-danger small"></span>
+                    </div>
+
+                    <div class="auth-field auth-field-full">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control auth-input" placeholder="owner@restaurant.com" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+
+                    <div class="auth-field">
+                        <label asp-for="Password" class="form-label"></label>
+                        <input asp-for="Password" class="form-control auth-input" placeholder="Create a strong password" />
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                    </div>
+
+                    <div class="auth-field">
+                        <label asp-for="ConfirmPassword" class="form-label"></label>
+                        <input asp-for="ConfirmPassword" class="form-control auth-input" placeholder="Repeat your password" />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-brand btn-lg auth-submit auth-field-full">Create owner account</button>
+                </form>
+
+                <div class="auth-footer-note">
+                    <span>Already have an account?</span>
+                    <a asp-action="Login">Sign in</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

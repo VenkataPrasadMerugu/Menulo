@@ -1,0 +1,75 @@
+@using Microsoft.AspNetCore.Http
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Menulo</title>
+    <script>
+        (function () {
+            var savedTheme = localStorage.getItem("menulo-theme");
+            var preferredDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+            var theme = savedTheme || (preferredDark ? "dark" : "light");
+            document.documentElement.setAttribute("data-theme", theme);
+        })();
+    </script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="@(ViewData["BodyClass"] as string)">
+    @{
+        var selectedRestaurantId = Context.Session.GetInt32("SelectedRestaurantId");
+    }
+    <header class="site-header">
+        <nav class="navbar navbar-expand-lg">
+            <div class="container">
+                <a class="navbar-brand" asp-controller="Home" asp-action="Index">Menulo</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="mainNav">
+                    <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+                        <li class="nav-item">
+                            <button type="button" class="btn btn-theme-toggle js-theme-toggle" aria-label="Toggle dark mode" aria-pressed="false">
+                                <span class="theme-toggle-icon" aria-hidden="true"></span>
+                                <span class="theme-toggle-label">Dark mode</span>
+                            </button>
+                        </li>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-area="Owner" asp-controller="Dashboard" asp-action="Index" asp-route-restaurantId="@selectedRestaurantId">Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-area="Owner" asp-controller="Restaurant" asp-action="Profile" asp-route-restaurantId="@selectedRestaurantId">Account</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-area="Owner" asp-controller="MenuItems" asp-action="Index" asp-route-restaurantId="@selectedRestaurantId">Menu Items</a></li>
+                            <li class="nav-item">
+                                <form asp-controller="Account" asp-action="Logout" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-outline-dark">Logout</button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item"><a class="btn btn-outline-dark" asp-controller="Account" asp-action="Login">Login</a></li>
+                            <li class="nav-item"><a class="btn btn-brand" asp-controller="Account" asp-action="Register">Register</a></li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="pb-5">
+        <div class="container pt-3 app-alerts-wrap">
+            <partial name="_Alerts" />
+        </div>
+        @RenderBody()
+    </main>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

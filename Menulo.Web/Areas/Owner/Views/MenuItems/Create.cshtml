@@ -1,0 +1,16 @@
+@model Menulo.Web.ViewModels.Owner.MenuItemFormViewModel
+@{
+    ViewData["Title"] = "Add Menu Item";
+}
+
+<div class="owner-shell">
+    <div class="section-heading">
+        <span class="eyebrow">Menu Module</span>
+        <h1 class="h2 mt-2">Add menu item</h1>
+    </div>
+    <partial name="_Form" model="Model" />
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

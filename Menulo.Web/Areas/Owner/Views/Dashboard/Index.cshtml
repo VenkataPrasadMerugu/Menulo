@@ -1,0 +1,178 @@
+@model Menulo.Web.ViewModels.Owner.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="owner-shell">
+    <div class="dashboard-shell" style="--dash-primary:@Model.PrimaryColor; --dash-secondary:@Model.SecondaryColor;">
+        <section class="dashboard-hero panel-card">
+            <div class="dashboard-hero-copy">
+                <span class="eyebrow text-white-50">Owner Dashboard</span>
+                <h1 class="dashboard-hero-title">@Model.RestaurantName</h1>
+                <p class="dashboard-hero-text">Manage branding, menu items, and branch-level operations from one focused workspace.</p>
+                @if (!string.IsNullOrWhiteSpace(Model.BranchName) || !string.IsNullOrWhiteSpace(Model.Address))
+                {
+                    <div class="dashboard-location">
+                        @if (!string.IsNullOrWhiteSpace(Model.BranchName))
+                        {
+                            <span>@Model.BranchName</span>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(Model.Address))
+                        {
+                            <span>@Model.Address</span>
+                        }
+                    </div>
+                }
+                <div class="dashboard-hero-actions">
+                    <a class="btn btn-light" asp-area="Owner" asp-controller="Restaurant" asp-action="Profile" asp-route-restaurantId="@Model.RestaurantId">Restaurant account</a>
+                    <a class="btn btn-outline-light" asp-area="Owner" asp-controller="Restaurant" asp-action="Branding" asp-route-restaurantId="@Model.RestaurantId">Branding</a>
+                    <a class="btn btn-outline-light" asp-area="Owner" asp-controller="MenuItems" asp-action="Index" asp-route-restaurantId="@Model.RestaurantId">Menu items</a>
+                </div>
+            </div>
+
+            <div class="dashboard-hero-stats">
+                <div class="dashboard-stat-card">
+                    <span>Total items</span>
+                    <strong>@Model.TotalMenuItems</strong>
+                </div>
+                <div class="dashboard-stat-card">
+                    <span>Active</span>
+                    <strong>@Model.ActiveItemCount</strong>
+                </div>
+                <div class="dashboard-stat-card">
+                    <span>Out of stock</span>
+                    <strong>@Model.OutOfStockItemCount</strong>
+                </div>
+            </div>
+        </section>
+
+        <div class="dashboard-grid">
+            <section class="dashboard-main">
+                <div class="panel-card dashboard-panel">
+                    <div class="dashboard-panel-head">
+                        <div>
+                            <h2 class="h5 mb-1">Your restaurants</h2>
+                            <p class="text-muted mb-0">Switch the active restaurant or create a new branch under the same owner account.</p>
+                        </div>
+                        <a class="btn btn-outline-dark" asp-area="Owner" asp-controller="Restaurant" asp-action="Profile" asp-route-createNew="true">Add new</a>
+                    </div>
+
+                    <div class="restaurant-switcher mt-3">
+                        @foreach (var restaurant in Model.Restaurants)
+                        {
+                            <a class="restaurant-chip @(Model.RestaurantId == restaurant.Id ? "active" : string.Empty)" asp-area="Owner" asp-controller="Dashboard" asp-action="SelectRestaurant" asp-route-restaurantId="@restaurant.Id" asp-route-returnUrl="@Url.Action("Index", "Dashboard", new { area = "Owner" })">
+                                <strong>@restaurant.Name</strong>
+                                <span>@(restaurant.BranchName ?? restaurant.PublicMenuPath)</span>
+                            </a>
+                        }
+                    </div>
+                </div>
+
+                @if (!Model.HasRestaurantProfile)
+                {
+                    <div class="alert alert-warning mt-4">Create your first restaurant profile to unlock branding and menu management.</div>
+                }
+
+                <div class="panel-card dashboard-panel mt-4">
+                    <div class="dashboard-panel-head">
+                        <div>
+                            <h2 class="h5 mb-1">Public menu link</h2>
+                            <p class="text-muted mb-0">Share the live menu URL with customers or download the QR for tables, receipts, and counters.</p>
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(Model.PublicMenuUrl))
+                        {
+                            <a class="btn btn-outline-dark btn-sm" href="@Model.PublicMenuUrl" target="_blank" rel="noreferrer">View menu</a>
+                        }
+                    </div>
+
+                    <div class="dashboard-link-preview mt-3">
+                        <div class="dashboard-link-content">
+                            <div class="copy-link-group dashboard-link-group">
+                                <input class="form-control" readonly value="@(Model.PublicMenuUrl ?? "Create your profile to generate a menu link")" />
+                                <button type="button" class="btn btn-brand js-copy-link" data-copy-text="@Model.PublicMenuUrl" @(string.IsNullOrWhiteSpace(Model.PublicMenuUrl) ? "disabled" : null)>Copy link</button>
+                            </div>
+
+                            <div class="dashboard-link-actions mt-3">
+                                <a class="btn btn-outline-dark btn-sm @(string.IsNullOrWhiteSpace(Model.PublicMenuUrl) ? "disabled" : string.Empty)" href="@Model.QrDownloadUrl">Download QR</a>
+                                <button
+                                    type="button"
+                                    class="btn btn-brand btn-sm js-open-phone-preview"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#phonePreviewModal"
+                                    data-preview-src="@Model.PublicMenuUrl"
+                                    @(string.IsNullOrWhiteSpace(Model.PublicMenuUrl) ? "disabled" : null)>
+                                    Open phone preview
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-phone-preview-hint">
+                            <div class="dashboard-phone-preview-card">
+                                <strong>Interactive mobile preview</strong>
+                                <p class="mb-0 text-muted">Open the phone preview to test scroll, click images, and browse the live menu inside a phone frame.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="dashboard-sidebar">
+                <div class="panel-card dashboard-panel">
+                    <div class="dashboard-panel-head">
+                        <div>
+                            <h2 class="h5 mb-1">Brand preview</h2>
+                            <p class="text-muted mb-0">Current colors and identity for the selected restaurant.</p>
+                        </div>
+                    </div>
+
+                    <div class="brand-preview mt-3" style="--owner-primary:@Model.PrimaryColor; --owner-secondary:@Model.SecondaryColor;">
+                        <div class="brand-preview-header">
+                            @if (!string.IsNullOrWhiteSpace(Model.LogoPath))
+                            {
+                                <img src="@Url.Content(Model.LogoPath)" class="brand-logo brand-logo-sm" alt="Logo preview" />
+                            }
+                            <span>@Model.RestaurantSlug</span>
+                        </div>
+                        <div class="brand-preview-body">
+                            <span class="brand-chip">@Model.PrimaryColor</span>
+                            <span class="brand-chip alt">@Model.SecondaryColor</span>
+                            <div class="mt-2 small">Currency: @Model.CurrencySymbol</div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-action-stack mt-3">
+                        <a class="btn btn-brand" asp-area="Owner" asp-controller="MenuItems" asp-action="Create" asp-route-restaurantId="@Model.RestaurantId">Add item</a>
+                        <a class="btn btn-outline-dark" asp-area="Owner" asp-controller="MenuItems" asp-action="Index" asp-route-restaurantId="@Model.RestaurantId">Manage items</a>
+                        <a class="btn btn-outline-dark" asp-area="Owner" asp-controller="Restaurant" asp-action="Branding" asp-route-restaurantId="@Model.RestaurantId">Update branding</a>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="phonePreviewModal" tabindex="-1" aria-labelledby="phonePreviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content dashboard-preview-modal">
+            <div class="modal-header border-0">
+                <div>
+                    <h2 class="h5 mb-1" id="phonePreviewModalLabel">Live phone preview</h2>
+                    <p class="text-muted mb-0">This loads the actual public menu, not a static screenshot.</p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="dashboard-phone-frame dashboard-phone-frame-modal">
+                    <div class="dashboard-phone-notch"></div>
+                    <div class="dashboard-phone-screen dashboard-phone-screen-live">
+                        <iframe
+                            class="dashboard-phone-iframe js-phone-preview-frame"
+                            title="Live public menu preview"
+                            loading="lazy"
+                            referrerpolicy="strict-origin-when-cross-origin"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

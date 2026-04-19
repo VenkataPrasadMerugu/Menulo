@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#F6D483"/>
+      <stop offset="100%" stop-color="#7F5422"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="480" fill="url(#bg)"/>
+  <rect x="160" y="120" width="320" height="180" rx="36" fill="#F5E1B8"/>
+  <circle cx="240" cy="180" r="18" fill="#D44E3B"/>
+  <circle cx="320" cy="220" r="18" fill="#5F9E51"/>
+  <circle cx="400" cy="180" r="18" fill="#D44E3B"/>
+  <text x="320" y="390" text-anchor="middle" font-size="34" font-family="Segoe UI, Arial, sans-serif" font-weight="700" fill="#FFFFFF">Paneer Tikka Flatbread</text>
+</svg>

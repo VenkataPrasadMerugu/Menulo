@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-labelledby="title">
+  <title>Menulo Demo Logo</title>
+  <rect width="240" height="240" rx="40" fill="#8D1B3D"/>
+  <circle cx="120" cy="92" r="36" fill="#F2B544"/>
+  <path d="M64 160h112c-6 24-27 40-56 40s-50-16-56-40Z" fill="#FFF6E8"/>
+  <text x="120" y="173" text-anchor="middle" font-size="30" font-family="Segoe UI, Arial, sans-serif" font-weight="700" fill="#8D1B3D">PS</text>
+</svg>

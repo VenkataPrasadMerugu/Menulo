@@ -1,0 +1,101 @@
+@model Menulo.Web.ViewModels.Owner.RestaurantProfileViewModel
+@using Menulo.Domain.Modules.Restaurants
+@{
+    ViewData["Title"] = "Restaurant Account";
+}
+
+<div class="owner-shell">
+    <div class="section-heading">
+        <span class="eyebrow">Restaurant Module</span>
+        <h1 class="h2 mt-2">Restaurant account</h1>
+        <p class="text-muted mb-0">Create multiple restaurants or branches under one owner login. The public menu URL is generated automatically as a short slug.</p>
+    </div>
+
+    <div class="panel-card mt-4">
+        <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-center">
+            <div>
+                <h2 class="h5 mb-1">Your restaurants</h2>
+                <p class="text-muted mb-0">Switch between restaurants or create a new one.</p>
+            </div>
+            <a class="btn btn-outline-dark" asp-action="Profile" asp-route-createNew="true">Add new restaurant</a>
+        </div>
+        @if (Model.Restaurants.Count > 0)
+        {
+            <div class="restaurant-switcher mt-3">
+                @foreach (var restaurant in Model.Restaurants)
+                {
+                    <a class="restaurant-chip @(Model.RestaurantId == restaurant.Id ? "active" : string.Empty)" asp-area="Owner" asp-controller="Dashboard" asp-action="SelectRestaurant" asp-route-restaurantId="@restaurant.Id" asp-route-returnUrl="@Url.Action("Profile", "Restaurant", new { area = "Owner" })">
+                        <strong>@restaurant.Name</strong>
+                        <span>@(restaurant.BranchName ?? restaurant.PublicMenuPath)</span>
+                    </a>
+                }
+            </div>
+        }
+    </div>
+
+    <div class="panel-card mt-4">
+        <form method="post" enctype="multipart/form-data" novalidate>
+            <input asp-for="RestaurantId" type="hidden" />
+            <input asp-for="IsCreateMode" type="hidden" />
+            <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label asp-for="Name" class="form-label"></label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="BranchName" class="form-label"></label>
+                    <input asp-for="BranchName" class="form-control" placeholder="Jubilee Hills Branch" />
+                    <span asp-validation-for="BranchName" class="text-danger small"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="Address" class="form-label"></label>
+                    <textarea asp-for="Address" class="form-control" rows="3" placeholder="Road no. 12, Hyderabad"></textarea>
+                    <span asp-validation-for="Address" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Generated public menu path</label>
+                    <input class="form-control" readonly value="@(Model.PublicMenuPath ?? "Will be generated after save")" />
+                    <div class="form-text">Example: <code>/chefs-village-by-cuisine-voyage/menu</code>, duplicate names become <code>-2</code>, <code>-3</code>.</div>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="CurrencyCode" class="form-label"></label>
+                    <select asp-for="CurrencyCode" asp-items="Html.GetEnumSelectList<CurrencyCode>()" class="form-select"></select>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="Logo" class="form-label"></label>
+                    <input asp-for="Logo" class="form-control" accept=".png,.jpg,.jpeg,.webp,.svg" />
+                    <span asp-validation-for="Logo" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    @if (!string.IsNullOrWhiteSpace(Model.ExistingLogoPath))
+                    {
+                        <img src="@Url.Content(Model.ExistingLogoPath)" class="brand-logo-preview" alt="Current logo" />
+                    }
+                </div>
+                @if (Model.IsCreateMode)
+                {
+                    <div class="col-md-6">
+                        <label asp-for="ImportSourceRestaurantId" class="form-label"></label>
+                        <select asp-for="ImportSourceRestaurantId" class="form-select">
+                            <option value="">Do not import menu</option>
+                            @foreach (var restaurant in Model.ImportSources)
+                            {
+                                <option value="@restaurant.Id">@restaurant.Name@(string.IsNullOrWhiteSpace(restaurant.BranchName) ? string.Empty : $" - {restaurant.BranchName}")</option>
+                            }
+                        </select>
+                        <div class="form-text">Select an existing branch to copy its menu while creating this restaurant.</div>
+                    </div>
+                }
+            </div>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-brand">@(Model.IsCreateMode ? "Create restaurant" : "Save restaurant profile")</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

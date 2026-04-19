@@ -1,0 +1,66 @@
+@model Menulo.Web.ViewModels.Owner.MenuItemFormViewModel
+@using Menulo.Domain.Modules.Menu
+
+<div class="panel-card mt-4">
+    <div class="restaurant-switcher mb-4">
+        @foreach (var restaurant in Model.Restaurants)
+        {
+            var returnAction = Model.Id.HasValue ? "Edit" : "Create";
+            <a class="restaurant-chip @(Model.RestaurantId == restaurant.Id ? "active" : string.Empty)" asp-area="Owner" asp-controller="Dashboard" asp-action="SelectRestaurant" asp-route-restaurantId="@restaurant.Id" asp-route-returnUrl="@Url.Action(returnAction, "MenuItems", new { area = "Owner", id = Model.Id })">
+                <strong>@restaurant.Name</strong>
+                <span>@(restaurant.BranchName ?? restaurant.PublicMenuPath)</span>
+            </a>
+        }
+    </div>
+
+    <form method="post" enctype="multipart/form-data" novalidate>
+        <input asp-for="RestaurantId" type="hidden" />
+        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger small"></span>
+            </div>
+            <div class="col-md-3">
+                <label asp-for="Category" class="form-label"></label>
+                <select asp-for="Category" asp-items="Html.GetEnumSelectList<MenuCategory>()" class="form-select"></select>
+            </div>
+            <div class="col-md-3">
+                <label asp-for="FoodType" class="form-label"></label>
+                <select asp-for="FoodType" asp-items="Html.GetEnumSelectList<FoodType>()" class="form-select"></select>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Price" class="form-label"></label>
+                <input asp-for="Price" class="form-control" />
+                <span asp-validation-for="Price" class="text-danger small"></span>
+            </div>
+            <div class="col-md-3">
+                <label asp-for="Serves" class="form-label"></label>
+                <input asp-for="Serves" class="form-control" min="1" max="50" />
+                <span asp-validation-for="Serves" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Images" class="form-label"></label>
+                <input asp-for="Images" class="form-control" accept=".png,.jpg,.jpeg,.webp,.svg" multiple />
+                <div class="form-text">You can upload multiple images. Customers can open them in a larger gallery.</div>
+                <span asp-validation-for="Images" class="text-danger small"></span>
+            </div>
+            <div class="col-12">
+                @if (Model.ExistingImagePaths.Count > 0)
+                {
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach (var image in Model.ExistingImagePaths)
+                        {
+                            <img src="@Url.Content(image)" class="brand-logo-preview" alt="Menu item image" />
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="mt-4 d-flex gap-2">
+            <button type="submit" class="btn btn-brand">Save</button>
+            <a asp-action="Index" asp-route-restaurantId="@Model.RestaurantId" class="btn btn-outline-dark">Back</a>
+        </div>
+    </form>
+</div>

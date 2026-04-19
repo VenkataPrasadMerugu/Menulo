@@ -1,0 +1,141 @@
+@model Menulo.Web.ViewModels.Owner.BrandingSettingsViewModel
+@{
+    ViewData["Title"] = "Branding";
+}
+
+<div class="owner-shell">
+    <div class="branding-shell" style="--dash-primary:@Model.PrimaryColor; --dash-secondary:@Model.SecondaryColor;">
+        <section class="dashboard-hero branding-hero panel-card">
+            <div class="dashboard-hero-copy">
+                <span class="eyebrow text-white-50">Branding Module</span>
+                <h1 class="dashboard-hero-title">Branding settings</h1>
+                <p class="dashboard-hero-text">Pick a preset palette or fine-tune the colors and logo for the selected restaurant.</p>
+            </div>
+            <div class="branding-hero-preview">
+                <div class="brand-preview" style="--owner-primary:@Model.PrimaryColor; --owner-secondary:@Model.SecondaryColor;">
+                    <div class="brand-preview-header">
+                        @if (!string.IsNullOrWhiteSpace(Model.ExistingLogoPath))
+                        {
+                            <img src="@Url.Content(Model.ExistingLogoPath)" class="brand-logo brand-logo-sm" alt="Logo preview" />
+                        }
+                        <span>@Model.RestaurantSlug</span>
+                    </div>
+                    <div class="brand-preview-body">
+                        <span class="brand-chip">@Model.PrimaryColor</span>
+                        <span class="brand-chip alt">@Model.SecondaryColor</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="dashboard-grid">
+            <section class="dashboard-main">
+                <div class="panel-card dashboard-panel">
+                    <div class="dashboard-panel-head">
+                        <div>
+                            <h2 class="h5 mb-1">Select restaurant</h2>
+                            <p class="text-muted mb-0">Switch the active restaurant before editing branding details.</p>
+                        </div>
+                    </div>
+                    <div class="restaurant-switcher mt-3">
+                        @foreach (var restaurant in Model.Restaurants)
+                        {
+                            <a class="restaurant-chip @(Model.RestaurantId == restaurant.Id ? "active" : string.Empty)" asp-area="Owner" asp-controller="Dashboard" asp-action="SelectRestaurant" asp-route-restaurantId="@restaurant.Id" asp-route-returnUrl="@Url.Action("Branding", "Restaurant", new { area = "Owner" })">
+                                <strong>@restaurant.Name</strong>
+                                <span>@(restaurant.BranchName ?? restaurant.PublicMenuPath)</span>
+                            </a>
+                        }
+                    </div>
+                </div>
+
+                <div class="panel-card dashboard-panel mt-4">
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        <input asp-for="RestaurantId" type="hidden" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+                        <div class="row g-4">
+                            <div class="col-12">
+                                <label asp-for="PaletteKey" class="form-label"></label>
+                                <div class="palette-grid">
+                                    @foreach (var palette in Model.PaletteOptions)
+                                    {
+                                        <label class="palette-card">
+                                            <input type="radio" asp-for="PaletteKey" value="@palette.Key" data-primary="@palette.PrimaryColor" data-secondary="@palette.SecondaryColor" class="js-palette-option" />
+                                            <span class="palette-swatch">
+                                                <span style="background:@palette.PrimaryColor"></span>
+                                                <span style="background:@palette.SecondaryColor"></span>
+                                            </span>
+                                            <span class="palette-name">@palette.Name</span>
+                                        </label>
+                                    }
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="PrimaryColor" class="form-label"></label>
+                                <div class="color-picker-card">
+                                    <input asp-for="PrimaryColor" class="form-control form-control-color w-100 js-color-sync" data-target="#PrimaryColorText" />
+                                    <input asp-for="PrimaryColorText" class="form-control js-color-text" />
+                                </div>
+                                <span asp-validation-for="PrimaryColor" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="SecondaryColor" class="form-label"></label>
+                                <div class="color-picker-card">
+                                    <input asp-for="SecondaryColor" class="form-control form-control-color w-100 js-color-sync" data-target="#SecondaryColorText" />
+                                    <input asp-for="SecondaryColorText" class="form-control js-color-text" />
+                                </div>
+                                <span asp-validation-for="SecondaryColor" class="text-danger small"></span>
+                            </div>
+                            <div class="col-12">
+                                <label asp-for="Logo" class="form-label"></label>
+                                <input asp-for="Logo" class="form-control" accept=".png,.jpg,.jpeg,.webp,.svg" />
+                                <span asp-validation-for="Logo" class="text-danger small"></span>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-brand">Save branding</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <aside class="dashboard-sidebar">
+                <div class="panel-card dashboard-panel">
+                    <div class="dashboard-panel-head">
+                        <div>
+                            <h2 class="h5 mb-1">Live preview</h2>
+                            <p class="text-muted mb-0">Quick preview of the selected theme applied to a menu card.</p>
+                        </div>
+                    </div>
+                    <div class="branding-preview mt-3" style="--owner-primary:@Model.PrimaryColor; --owner-secondary:@Model.SecondaryColor;">
+                        <div class="branding-preview-header">
+                            @if (!string.IsNullOrWhiteSpace(Model.ExistingLogoPath))
+                            {
+                                <img src="@Url.Content(Model.ExistingLogoPath)" class="brand-logo brand-logo-sm" alt="Logo preview" />
+                            }
+                            <div>
+                                <strong>Menu Preview</strong>
+                                <div class="small">@Model.RestaurantSlug</div>
+                            </div>
+                        </div>
+                        <div class="branding-preview-card">
+                            <div class="branding-preview-accent"></div>
+                            <div class="d-flex justify-content-between align-items-center gap-2">
+                                <div>
+                                    <span class="food-type-pill veg">Veg</span>
+                                    <span class="small text-muted d-block mt-2">Curries</span>
+                                    <strong>Paneer Butter Masala</strong>
+                                </div>
+                                <span class="price-tag">Rs 249.00</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-brand mt-3 w-100" type="button">Primary action</button>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
